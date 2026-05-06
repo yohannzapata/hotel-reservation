@@ -1,62 +1,37 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 public class FileHandler {
 
     private static final String SAVE_DIR_NAME = "SAVES";
 
-    private static Path getSaveDirPath() {
+    private static File getSaveDirPath() {
         String userDir = System.getProperty("user.dir");
-        Path dir = Path.of(userDir, SAVE_DIR_NAME);
-        try {
-            Files.createDirectories(dir);
-        } catch (IOException e) {
+        File dir = new File(userDir, SAVE_DIR_NAME);
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
         return dir;
     }
 
-    public static Path resolveFilePath(String fileName) {
-        return getSaveDirPath().resolve(fileName);
-    }
-
-    public static boolean ensureFileExists(String fileName) {
-        Path file = resolveFilePath(fileName);
-        try {
-            Files.createDirectories(file.getParent());
-            if (!Files.exists(file)) {
-                Files.createFile(file);
-            }
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
+    public static File resolveFilePath(String fileName) {
+        return new File(getSaveDirPath(), fileName);
     }
 
     public static boolean saveToFile(String fileName, String data) {
-        Path file = resolveFilePath(fileName);
+        File file = resolveFilePath(fileName);
 
         try {
-            Files.createDirectories(file.getParent());
-        } catch (IOException e) {
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+        } catch (Exception e) {
             System.out.println("Error creating save directory: " + e.getMessage());
             return false;
         }
 
-        try (BufferedWriter bw = Files.newBufferedWriter(
-                file,
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE,
-                StandardOpenOption.APPEND
-        )) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
             bw.write(data);
             bw.newLine();
             return true;
@@ -68,13 +43,13 @@ public class FileHandler {
 
     public static List<String> searchRecord(String fileName, String searchKey, int keyIndex) {
         List<String> foundList = new ArrayList<>(); 
-        Path file = resolveFilePath(fileName);
+        File file = resolveFilePath(fileName);
         
-        if (!Files.exists(file)) {
+        if (!file.exists()) {
             return foundList; 
         }
 
-        try (BufferedReader br = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split("\\|"); 
@@ -93,23 +68,17 @@ public class FileHandler {
     }
 
     public static boolean moveOrUpdateRecord(String sourceFileName, String targetFileName, String searchKey, int keyIndex) {
-        Path sourceFile = resolveFilePath(sourceFileName);
-        Path tempFile = resolveFilePath(sourceFileName + ".tmp");
+        File sourceFile = resolveFilePath(sourceFileName);
+        File tempFile = resolveFilePath(sourceFileName + ".tmp");
 
-        if (!Files.exists(sourceFile)) {
+        if (!sourceFile.exists()) {
             return false;
         }
 
         boolean found = false;
 
-        try (BufferedReader br = Files.newBufferedReader(sourceFile, StandardCharsets.UTF_8);
-             BufferedWriter bwTemp = Files.newBufferedWriter(
-                     tempFile,
-                     StandardCharsets.UTF_8,
-                     StandardOpenOption.CREATE,
-                     StandardOpenOption.TRUNCATE_EXISTING,
-                     StandardOpenOption.WRITE
-             )) {
+        try (BufferedReader br = new BufferedReader(new FileReader(sourceFile));
+             BufferedWriter bwTemp = new BufferedWriter(new FileWriter(tempFile))) {
              
             String line;
             while ((line = br.readLine()) != null) {
@@ -128,15 +97,14 @@ public class FileHandler {
             return false;
         }
 
-        try {
-            Files.move(tempFile, sourceFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (IOException e) {
-            try {
-                Files.move(tempFile, sourceFile, StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException ex) {
-                System.out.println("Error finalizing record move: " + ex.getMessage());
-                return false;
-            }
+        if (sourceFile.exists() && !sourceFile.delete()) {
+            System.out.println("Error finalizing record move: could not replace original file.");
+            return false;
+        }
+
+        if (!tempFile.renameTo(sourceFile)) {
+            System.out.println("Error finalizing record move: could not rename temp file.");
+            return false;
         }
         
         return found; 
@@ -144,13 +112,13 @@ public class FileHandler {
 
     public static List<String> getAllRecords(String fileName) {
         List<String> records = new ArrayList<>();
-        Path file = resolveFilePath(fileName);
+        File file = resolveFilePath(fileName);
 
-        if (!Files.exists(file)) {
+        if (!file.exists()) {
             return records;
         }
 
-        try (BufferedReader br = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (!line.trim().isEmpty()) {
@@ -164,7 +132,4 @@ public class FileHandler {
         return records;
     }
 
-    public static boolean moveRecord(String sourceFileName, String targetFileName, String searchKey, int keyIndex) {
-        return moveOrUpdateRecord(sourceFileName, targetFileName, searchKey, keyIndex);
-    }
 }
