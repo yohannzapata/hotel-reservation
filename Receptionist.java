@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.io.*;
 
 public class Receptionist {
@@ -55,7 +53,7 @@ public class Receptionist {
         System.out.println("<-                  RECEPTIONIST LOGIN                 ->");
         System.out.println("=========================================================");
 
-        File staffFile = FileHandler.resolveFilePath(RECEPTIONIST_FILE).toFile();
+        File staffFile = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
         ensureDefaultReceptionistAccount(staffFile);
 
         String username, password;
@@ -142,7 +140,7 @@ public class Receptionist {
 
         System.out.print("Confirm? [Y/N]: ");
         if (sc.nextLine().equalsIgnoreCase("Y")) {
-            File staffFile = FileHandler.resolveFilePath(RECEPTIONIST_FILE).toFile();
+            File staffFile = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(staffFile, true))) {
                 bw.write(username + "," + password);
                 bw.newLine();
@@ -156,7 +154,7 @@ public class Receptionist {
     }
 
     private static boolean validateCredentials(String username, String password) {
-        File file = FileHandler.resolveFilePath(RECEPTIONIST_FILE).toFile();
+        File file = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
         if (!file.exists()) return false;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -172,7 +170,7 @@ public class Receptionist {
     }
 
     private static boolean isUsernameUnique(String username) {
-        File file = FileHandler.resolveFilePath(RECEPTIONIST_FILE).toFile();
+        File file = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
         if (!file.exists()) return true;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
@@ -291,7 +289,7 @@ public class Receptionist {
                 pause();
                 return;
             }
-            FileHandler.moveRecord(RESERVE_FILE, CHECKED_IN_FILE, resID, 0);
+            FileHandler.moveOrUpdateRecord(RESERVE_FILE, CHECKED_IN_FILE, resID, 0);
             System.out.println("Checked in!");
         }
         pause();
