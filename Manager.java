@@ -13,7 +13,7 @@ public class Manager {
     private Scanner sc = Main.sc;
 
     private File resolveFile(String fileName) {
-        return FileHandler.resolveFilePath(fileName).toFile();
+        return FileHandler.resolveFilePath(fileName);
     }
 
     private void ensureDefaultManagerAccount() {
@@ -185,7 +185,7 @@ public boolean loginManager() {
         if (searchKey.toUpperCase().startsWith("R-")) {
             System.out.print("Confirm cancel reservation '" + searchKey + "'? (Y/N): ");
             if (sc.nextLine().trim().equalsIgnoreCase("Y")) {
-                boolean moved = FileHandler.moveRecord(RESERVE_FILE, CANCELLED_FILE, searchKey, 0);
+                boolean moved = FileHandler.moveOrUpdateRecord(RESERVE_FILE, CANCELLED_FILE, searchKey, 0);
                 if (moved) {
                     System.out.println("\n*********************************************************");
                     System.out.println("*          Reservation cancelled successfully!          *");
@@ -214,7 +214,7 @@ public boolean loginManager() {
 
             System.out.print("Confirm cancel reservation '" + resId + "'? (Y/N): ");
             if (sc.nextLine().trim().equalsIgnoreCase("Y")) {
-                boolean moved = FileHandler.moveRecord(RESERVE_FILE, CANCELLED_FILE, resId, 0);
+                boolean moved = FileHandler.moveOrUpdateRecord(RESERVE_FILE, CANCELLED_FILE, resId, 0);
                 if (moved) {
                     System.out.println("\n*********************************************************");
                     System.out.println("*          Reservation cancelled successfully!          *");
@@ -249,7 +249,7 @@ public boolean loginManager() {
 
         System.out.print("Confirm cancel reservation '" + resId + "'? (Y/N): ");
         if (sc.nextLine().trim().equalsIgnoreCase("Y")) {
-            boolean moved = FileHandler.moveRecord(RESERVE_FILE, CANCELLED_FILE, resId, 0);
+            boolean moved = FileHandler.moveOrUpdateRecord(RESERVE_FILE, CANCELLED_FILE, resId, 0);
             if (moved) {
                 System.out.println("\n*********************************************************");
                 System.out.println("*          Reservation cancelled successfully!          *");
