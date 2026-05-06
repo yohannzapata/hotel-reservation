@@ -4,9 +4,9 @@ This is a hotel reservation program that we made using Java. You can use it to b
 
 ## What can you do
 
-- **If ur a Client** - you can register and make a booking
-- **If ur a Receptionist** - you can login and see the clients and bookings. also you can check in guests
-- **If ur a Manager** - you can login and make receptionist accounts and cancel bookings
+- **If your a Client** - you can register and make a booking
+- **If your a Receptionist** - you can login and see the clients and bookings. also you can check in guests
+- **If your a Manager** - you can login and make receptionist accounts and cancel bookings
 
 ## How the files are organized
 
@@ -99,3 +99,4 @@ manager,manager123
 - `Main` is the entry point and routes to the role menus.
 - `Client`, `Receptionist`, and `Manager` contain role-specific workflows.
 - `FileHandler` provides reusable file operations (append, search, move/update, read-all) used by the other classes.
+
