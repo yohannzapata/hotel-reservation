@@ -1,7 +1,6 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Client {
 
@@ -23,7 +22,7 @@ public class Client {
                 return candidate;
             }
         }
-        // Fallback: timestamp-based
+
         String candidate = prefix + (System.currentTimeMillis() % 100000);
         return candidate;
     }
@@ -166,7 +165,7 @@ public class Client {
             clientID = sc.nextLine().trim();
         }
 
-        java.util.List<String> clientRecord = FileHandler.searchRecord(CLIENT_FILE, clientID, 0);
+        List<String> clientRecord = FileHandler.searchRecord(CLIENT_FILE, clientID, 0);
         if (clientRecord.size() == 0) {
             System.out.println("  -> Error: Client ID not found. Please register first.");
             System.out.print("\nPress Enter to go Back to Main Menu...");
@@ -277,8 +276,8 @@ public class Client {
 
         System.out.println("\n---------------------------------------------------------");
         System.out.println("5. Payment Options");
-        System.out.println("  [1] 30% Down");
-        System.out.println("  [2] 50% Down");
+        System.out.println("  [1] 30% Downpayment");
+        System.out.println("  [2] 50% Downpayment");
         System.out.println("  [3] 100% Full Payment");
         
         int payChoice = 0;
@@ -287,8 +286,8 @@ public class Client {
             System.out.print("\nSelect payment option (1-3) *: ");
             try {
                 payChoice = Integer.parseInt(sc.nextLine());
-                if (payChoice == 1) { payName = "30% Down"; break; }
-                else if (payChoice == 2) { payName = "50% Down"; break; }
+                if (payChoice == 1) { payName = "30% Downpayment"; break; }
+                else if (payChoice == 2) { payName = "50% Downpayment"; break; }
                 else if (payChoice == 3) { payName = "100% Full Payment"; break; }
                 else System.out.println("  -> Invalid choice.");
             } catch (Exception e) {
@@ -371,7 +370,7 @@ public class Client {
             if (saved == true) {
                 System.out.println("\n*********************************************************");
                 System.out.println("*           Reservation completed successfully!         *");
-                System.out.println("*                 Thank you, " + clientName + ".                *");
+                System.out.println("*                Thank you, " + clientName + ".                *");
                 System.out.println("*********************************************************");
                 System.out.print("\nPress Enter to go Back to Main Menu...");
                 sc.nextLine();
