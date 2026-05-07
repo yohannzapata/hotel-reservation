@@ -34,7 +34,7 @@ The program creates the `SAVES/` folder in the same folder where you run it.
 - Manager login uses the built-in credentials `admin` / `password123`.
 - Receptionist accounts are stored in `SAVES/RECEPTIONIST.txt`.
 
-## Saved Data Files
+## File Handling
 
 The program stores information as plain text files inside `SAVES/`.
 
