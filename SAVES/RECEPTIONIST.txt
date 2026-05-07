@@ -1,4 +1,0 @@
-AxelPatena,pasword
-receptionist,receptionist123
-Rhoda,password
-Axel,password123
