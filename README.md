@@ -1,4 +1,4 @@
-# Hotel Reservation System
+# DLSL Hotel Reservation 
 
 This is a DLSL Hotel Reservation console program. A user can register as a client, create a reservation, log in as a receptionist, or log in as a manager.
 
