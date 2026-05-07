@@ -9,11 +9,13 @@ public class Client {
     private static final String CLIENT_FILE = "CLIENTS.txt";
     private static final String RESERVE_FILE = "RESERVE.txt";
 
-    private static boolean containsRecordDelimiter(String value) {
-        if (value == null) return false;
-        return value.contains("|");
-    }
-
+    /*
+     * notes:
+     * - make random id for client or reserve
+     * - check if id already used first
+     * - use time value if random fail
+     * - try to keep ids not same
+     */
     private static String generateUniqueId(String prefix, String fileName, int keyIndex) {
         Random random = new Random();
         for (int attempt = 0; attempt < 50; attempt++) {
@@ -27,6 +29,12 @@ public class Client {
         return candidate;
     }
     
+    /*
+     * notes:
+     * - show client menu
+     * - wait user pick option
+     * - go back to main menu if user want
+     */
     public static void displayMenu() {
         boolean exit = false;
 
@@ -59,6 +67,13 @@ public class Client {
         }
     }
 
+    /*
+     * notes:
+     * - collect personal info
+     * - check name, contact, email
+     * - save new client if user say yes
+     * - print new id after saving
+     */
     public static void registerClient() {
         System.out.println("\n=========================================================");
         System.out.println("<-                 REGISTER NEW CLIENT                 ->");
@@ -72,11 +87,17 @@ public class Client {
         System.out.println("---------------------------------------------------------");
         System.out.println("Client Information\n");
 
+        /*
+         * NOTES:
+         * - ask for the client name first
+         * - check that the name uses letters and spaces only
+         * - reject empty input
+         */
         String fullName = "";
         while (true) {
             System.out.print("Full Name *: ");
             fullName = sc.nextLine();
-            if (fullName.isEmpty() == false && fullName.matches("[a-zA-Z ]+") && !containsRecordDelimiter(fullName)) {
+            if (fullName.isEmpty() == false && fullName.matches("[a-zA-Z ]+")) {
                 break;
             } else {
                 System.out.println("  -> Invalid: Letters/spaces only (no '|').");
@@ -86,20 +107,32 @@ public class Client {
         System.out.print("Password *: ");
         String password = sc.nextLine();
 
+        /*
+         * NOTES:
+         * - ask for the address
+         * - make sure the field is not blank
+         * - reject empty strings
+         */
         String address = "";
         while (true) {
             System.out.print("Address *: ");
             address = sc.nextLine();
-            if (address.isEmpty() == false && !containsRecordDelimiter(address)) {
+            if (address.isEmpty() == false) {
                 break;
             } else {
                 System.out.println("  -> Invalid: Address cannot be empty (no '|').");
             }
         }
 
+        /*
+         * NOTES:
+         * - check that the contact number has 11 digits
+         * - make sure it only uses numbers
+         * - reject duplicates already registered
+         */
         String contactNum = "";
         while (true) {
-            System.out.print("Contact Number (11 digits) *: ");
+            System.out.print("Contact Number (09xx-xxx-xxxx) *: ");
             contactNum = sc.nextLine();
             if (contactNum.length() == 11 && contactNum.matches("[0-9]+")) {
                 if (FileHandler.searchRecord(CLIENT_FILE, contactNum, 4).size() == 0) {
@@ -113,11 +146,16 @@ public class Client {
             }
         }
 
+        /*
+         * NOTES:
+         * - check that the email ends with gmail.com
+         * - reject if email is already registered
+         */
         String email = "";
         while (true) {
             System.out.print("Email (@gmail.com) *: ");
             email = sc.nextLine();
-            if (email.toLowerCase().endsWith("@gmail.com") && !containsRecordDelimiter(email)) {
+            if (email.toLowerCase().endsWith("@gmail.com")) {
                 if (FileHandler.searchRecord(CLIENT_FILE, email, 5).size() == 0) {
                     System.out.println("  -> Valid & Available");
                     break;
@@ -130,14 +168,31 @@ public class Client {
         }
 
         System.out.println("\n---------------------------------------------------------");
+        /*
+         * Notes:
+         * - ask for final confirmation
+         * - stop here if the user cancels
+         * - only save after the user agrees
+         */
         System.out.print("Confirm registration? [Y] Yes, Confirm / [N] No, Cancel: ");
         String confirm = sc.nextLine();
         
         if (confirm.equalsIgnoreCase("Y")) {
+            /*
+             * NOTES:
+             * - build a new client ID
+             * - combine every field into one record line
+             * - use | to match the file format
+             */
             String clientID = generateUniqueId("C-", CLIENT_FILE, 0);
             
             String finalData = clientID + "|" + password + "|" + fullName + "|" + address + "|" + contactNum + "|" + email;
             
+            /*
+             * NOTES:
+             * - save the new record to the client file
+             * - show the generated client ID after saving
+             */
             boolean saved = FileHandler.saveToFile(CLIENT_FILE, finalData); 
             if (saved == true) {
                 System.out.println("\n*********************************************************");
@@ -156,11 +211,24 @@ public class Client {
         }
     }
 
+    /*
+     * notes:
+     * - find the client first
+     * - check password and date
+     * - count total price before save
+     * - save reservation with pay status
+     */
     public static void createReservation() {
         System.out.println("\n=========================================================");
         System.out.println("<-                 CREATE RESERVATION                  ->");
         System.out.println("=========================================================");
         
+        /*
+         * NOTES:
+         * - start by finding the client record
+         * - use the client ID as the first search key
+         * - stop early if the ID is empty
+         */
         System.out.print("\nEnter Client ID *: ");
         String clientID = sc.nextLine().trim();
         while (clientID.isEmpty()) {
@@ -177,6 +245,12 @@ public class Client {
             return; 
         }
         
+        /*
+         * Notes:
+         * - read the saved client details
+         * - check if the saved password exists in the record
+         * - pull the client name from the right column
+         */
         String[] clientData = clientRecord.get(0).split("\\|");
         boolean hasSavedPassword = clientData.length >= 6;
         String savedPassword = hasSavedPassword ? clientData[1] : "";
@@ -198,6 +272,12 @@ public class Client {
         System.out.println("  -> Client found: " + clientName);
 
         System.out.println("\n---------------------------------------------------------");
+        /*
+         * Notes:
+         * - ask for the reservation date
+         * - reject dates in the past
+         * - accept only the yyyy-MM-dd format
+         */
         System.out.println("1. Reservation Date");
         LocalDate resDate = null;
         while (true) {
@@ -219,9 +299,14 @@ public class Client {
         }
 
         System.out.println("\n---------------------------------------------------------");
+        /*
+         * NOTES:
+         * - show the facility choice in table style
+         * - store the room price and pax limit
+         */
         System.out.println("2. Choose Facility");
         System.out.printf("  %-5s %-15s %-15s %-10s\n", "[#]", "Facility", "Price Per Unit", "Max # Pax");
-        System.out.printf("  %-5s %-15s %-15s %-10s\n", "[1]", "Single Room", "P1,500.00", "2");
+        System.out.printf("  %-5s %-15s %-15s %-10s\n", "[1]", "Single", "P1,500.00", "2");
         System.out.printf("  %-5s %-15s %-15s %-10s\n", "[2]", "Double", "P2,000.00", "3");
         System.out.printf("  %-5s %-15s %-15s %-10s\n", "[3]", "King", "P3,000.00", "4");
         System.out.printf("  %-5s %-15s %-15s %-10s\n", "[4]", "Suite", "P4,000.00", "6");
@@ -246,6 +331,11 @@ public class Client {
         }
 
         System.out.println("\n---------------------------------------------------------");
+        /*
+         * NOTES:
+         * - collect the number of rooms
+         * - collect the number of guests
+         */
         System.out.println("3. Rooms & Guests");
         int numOfRooms = 0;
         while (true) {
@@ -272,6 +362,10 @@ public class Client {
         }
 
         System.out.println("\n---------------------------------------------------------");
+        /*
+         * NOTES:
+         * - ask for the meal choice
+         */
         System.out.println("4. Meal Options");
         System.out.println("  [1] None   (P0)");
         System.out.println("  [2] Lunch  (P200)");
@@ -295,6 +389,12 @@ public class Client {
         }
 
         System.out.println("\n---------------------------------------------------------");
+        /*
+         * NOTES:
+         * - ask for the payment option
+         * - store the chosen payment label
+         * - use it later for the cost breakdown
+         */
         System.out.println("5. Payment Options");
         System.out.println("  [1] 30% Downpayment");
         System.out.println("  [2] 50% Downpayment");
@@ -315,6 +415,12 @@ public class Client {
             }
         }
 
+        /*
+         * NOTES:
+         * - compute the base room cost
+         * - add extra guest fees
+         * - add the meal cost to the total
+         */
         double baseCost = roomPrice * numOfRooms;
         double totalCost = baseCost;
 
@@ -336,6 +442,12 @@ public class Client {
         }
         totalCost = totalCost + mealCost;
 
+        /*
+         * NOTES:
+         * - calculate the amount to pay now
+         * - leave the rest as the remaining balance
+         * - use the payment choice percentage
+         */
         double amountToPay = 0;
         if (payChoice == 1) {
             amountToPay = totalCost * 0.30;
@@ -371,10 +483,22 @@ public class Client {
         System.out.printf("  %-25s P%.2f\n", "Remaining Balance:", remainingBalance);
 
         System.out.println("\n---------------------------------------------------------");
+        /*
+         * NOTES:
+         * - ask for reservation confirmation
+         * - stop here if the user cancels
+         * - save only when the user agrees
+         */
         System.out.print("Confirm Reservation? [Y] Yes, Confirm / [N] No, Cancel: ");
         String confirm = sc.nextLine();
 
         if (confirm.equalsIgnoreCase("Y")) {
+            /*
+             * NOTES:
+             * - build a reservation ID
+             * - set the payment status
+             * - save the final reservation record
+             */
             String resID = generateUniqueId("R-", RESERVE_FILE, 0);
             
             String status = "";
