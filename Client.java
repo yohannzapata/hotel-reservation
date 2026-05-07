@@ -1,4 +1,5 @@
-import java.time.*
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Client {
@@ -64,6 +65,7 @@ public class Client {
         System.out.println("=========================================================");
         System.out.println("\n[ Guidelines ]");
         System.out.println(" - Full name: letters and spaces only");
+        System.out.println(" - Password: ");
         System.out.println(" - Contact number: exactly 11 digits");
         System.out.println(" - Email: must end with @gmail.com");
         System.out.println(" - Contact number and email must be unique\n");
@@ -81,6 +83,9 @@ public class Client {
             }
         }
 
+        System.out.print("Password *: ");
+        String password = sc.nextLine();
+
         String address = "";
         while (true) {
             System.out.print("Address *: ");
@@ -97,7 +102,7 @@ public class Client {
             System.out.print("Contact Number (11 digits) *: ");
             contactNum = sc.nextLine();
             if (contactNum.length() == 11 && contactNum.matches("[0-9]+")) {
-                if (FileHandler.searchRecord(CLIENT_FILE, contactNum, 3).size() == 0) {
+                if (FileHandler.searchRecord(CLIENT_FILE, contactNum, 4).size() == 0) {
                     System.out.println("  -> Valid & Available");
                     break;
                 } else {
@@ -113,7 +118,7 @@ public class Client {
             System.out.print("Email (@gmail.com) *: ");
             email = sc.nextLine();
             if (email.toLowerCase().endsWith("@gmail.com") && !containsRecordDelimiter(email)) {
-                if (FileHandler.searchRecord(CLIENT_FILE, email, 4).size() == 0) {
+                if (FileHandler.searchRecord(CLIENT_FILE, email, 5).size() == 0) {
                     System.out.println("  -> Valid & Available");
                     break;
                 } else {
@@ -131,7 +136,7 @@ public class Client {
         if (confirm.equalsIgnoreCase("Y")) {
             String clientID = generateUniqueId("C-", CLIENT_FILE, 0);
             
-            String finalData = clientID + "|" + fullName + "|" + address + "|" + contactNum + "|" + email;
+            String finalData = clientID + "|" + password + "|" + fullName + "|" + address + "|" + contactNum + "|" + email;
             
             boolean saved = FileHandler.saveToFile(CLIENT_FILE, finalData); 
             if (saved == true) {
@@ -173,7 +178,23 @@ public class Client {
         }
         
         String[] clientData = clientRecord.get(0).split("\\|");
-        String clientName = clientData[1];
+        boolean hasSavedPassword = clientData.length >= 6;
+        String savedPassword = hasSavedPassword ? clientData[1] : "";
+        String clientName = hasSavedPassword ? clientData[2] : (clientData.length > 1 ? clientData[1] : "");
+
+        System.out.print("Enter Client Password *: ");
+        String password = sc.nextLine();
+        if (hasSavedPassword && !password.equals(savedPassword)) {
+            System.out.println("  -> Error: Password does not match the client record.");
+            System.out.print("\nPress Enter to go Back to Main Menu...");
+            sc.nextLine();
+            return;
+        }
+
+        if (!hasSavedPassword) {
+            System.out.println("  -> Client record found.");
+        }
+
         System.out.println("  -> Client found: " + clientName);
 
         System.out.println("\n---------------------------------------------------------");
