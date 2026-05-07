@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.io.*;
 
 public class Receptionist {
@@ -12,6 +10,10 @@ public class Receptionist {
     private static final String CHECKED_IN_FILE = "CHECKED-IN.txt";
     private static final String RECEPTIONIST_FILE = "RECEPTIONIST.txt";
 
+    /*
+     * NOTES:
+     * - show receptionist menu
+     */
     public static void displayMenu() {
         if (!loginReceptionist()) {
             System.out.println("\nAccess denied. Returning to main menu...");
@@ -50,6 +52,12 @@ public class Receptionist {
         }
     }
 
+    /*
+     * NOTES:
+     * - ask for receptionist username and password
+     * - check saved staff file 
+     * - let user retry if fail
+     */
     public static boolean loginReceptionist() {
         System.out.println("\n=========================================================");
         System.out.println("<-                  RECEPTIONIST LOGIN                 ->");
@@ -78,48 +86,12 @@ public class Receptionist {
         }
     }
 
-    public static void createReceptionistAccount() {
-        System.out.println("\n=========================================================");
-        System.out.println("<-               CREATE RECEPTIONIST ACCOUNT            ->");
-        System.out.println("=========================================================");
-
-        String username;
-        while (true) {
-            System.out.print("New Username *: ");
-            username = sc.nextLine().trim();
-            if (username.isEmpty() || !isUsernameUnique(username)) {
-                System.out.println("  -> Username invalid or exists.");
-                continue;
-            }
-            break;
-        }
-
-        String password;
-        while (true) {
-            System.out.print("New Password (min 6 chars) *: ");
-            password = sc.nextLine().trim();
-            if (password.length() < 6) {
-                System.out.println("-> Password too short.");
-                continue;
-            }
-            break;
-        }
-
-        System.out.print("Confirm? [Y/N]: ");
-        if (sc.nextLine().equalsIgnoreCase("Y")) {
-            File staffFile = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(staffFile, true))) {
-                bw.write(username + "," + password);
-                bw.newLine();
-                System.out.println("\nAccount created!");
-            } catch (IOException e) {
-                System.out.println("Save error.");
-            }
-        }
-        System.out.print("\nPress Enter...");
-        sc.nextLine();
-    }
-
+    /*
+     * NOTES:
+     * - check saved receptionist credential
+     * - split each line by comma
+     * - compare saved username and password
+     */
     private static boolean validateCredentials(String username, String password) {
         File file = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
         if (!file.exists()) return false;
@@ -136,23 +108,12 @@ public class Receptionist {
         return false;
     }
 
-    private static boolean isUsernameUnique(String username) {
-        File file = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
-        if (!file.exists()) return true;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 1 && data[0].trim().equals(username)) {
-                    return false;
-                }
-            }
-        } catch (IOException e) {}
-
-        return true;
-    }
-
+    /*
+     * NOTES:
+     * - load client records
+     * - can show all or just searched ones
+     * - search by client id 
+     */
     public static void viewClients() {
         System.out.println("\n=========================================================");
         System.out.println("<-                    VIEW CLIENTS                     ->");
@@ -161,6 +122,12 @@ public class Receptionist {
         System.out.print("\nEnter Client ID or Name (blank=ALL): ");
         String searchKey = sc.nextLine().trim();
 
+        /*
+         * NOTES:
+         * - load all clients first
+         * - narrow it down if search text exist
+         * - one method for all and search view
+         */
         List<String> allClients = FileHandler.getAllRecords(CLIENT_FILE);
         if (allClients.isEmpty()) {
             System.out.println("\n  -> No data yet. No clients registered.");
@@ -196,6 +163,17 @@ public class Receptionist {
         sc.nextLine();
     }
 
+    /*
+     * Loads reservation records and applies a display filter.
+     * The user can view all records, only paid records, records with balance,
+     * or a date-sorted list.
+     */
+        /*
+         * Notes:
+         * - loads reservation records
+         * - applies the selected filter
+         * - can show paid, balance, or date-sorted results
+         */
     public static void viewReservations() {
         System.out.println("\n=========================================================");
         System.out.println("<-                   VIEW RESERVATIONS                 ->");
@@ -215,16 +193,33 @@ public class Receptionist {
 
         List<String> filtered = new ArrayList<>(allReservations);
         if (filter.equals("2")) {
+            /*
+             * NOTES:
+             * - keep only fully paid reservations
+             * - remove anything with a different status
+             */
             filtered.removeIf(line -> {
                 String[] data = line.split("\\|");
                 return data.length < 10 || !data[9].equals("Paid");
             });
         } else if (filter.equals("3")) {
+            /*
+             * NOTES:
+             * - keep only reservations that still have a balance
+             * - show the PaidWithBalance records only
+             * - hide the fully paid ones
+             */
             filtered.removeIf(line -> {
                 String[] data = line.split("\\|");
                 return data.length < 10 || !data[9].equals("PaidWithBalance");
             });
         } else if (filter.equals("4")) {
+            /*
+             * NOTES:
+             * - sort the records by reservation date
+             * - show the oldest date first
+             * - keep the list ordered for readability
+             */
             filtered.sort((a, b) -> {
                 String[] dataA = a.split("\\|");
                 String[] dataB = b.split("\\|");
@@ -244,10 +239,22 @@ public class Receptionist {
         pause();
     }
 
+    /*
+     * NOTES:
+     * - marks a guest as checked in
+     * - looks up the reservation first
+     * - moves the record into the checked-in file
+     */
     public static void checkInGuest() {
         System.out.print("\nEnter Res ID/Client ID: ");
         String searchKey = sc.nextLine().trim();
 
+        /*
+         * Notes:
+         * - check reservation ID first
+         * - check client ID second
+         * - use whichever search finds a record
+         */
         List<String> reservations = FileHandler.searchRecord(RESERVE_FILE, searchKey, 0);
         if (reservations.isEmpty()) {
             reservations = FileHandler.searchRecord(RESERVE_FILE, searchKey, 1);
@@ -262,6 +269,7 @@ public class Receptionist {
         String[] data = reservations.get(0).split("\\|");
         String resID = data.length > 0 ? data[0] : "";
         
+        /* Notes: move the selected reservation after check-in confirmation. */
         System.out.print("Confirm check-in? [Y/N]: ");
         if (sc.nextLine().equalsIgnoreCase("Y")) {
             if (resID.isEmpty()) {
@@ -280,6 +288,12 @@ public class Receptionist {
         sc.nextLine();
     }
 
+    /*
+     * NOTES:
+     * - prints client records in a table
+     * - handles newer and older record layouts
+     * - table style
+     */
     private static void displayClientTable(List<String> clients) {
         if (clients == null || clients.isEmpty()) {
             System.out.println("\n  -> No data yet. No clients registered.");
@@ -293,6 +307,7 @@ public class Receptionist {
         for (String line : clients) {
             if (line == null || line.trim().isEmpty()) continue;
             String[] data = line.split("\\|");
+
             if (data.length >= 6) {
                 System.out.printf("  %-10s %-20s %-12s %s\n",
                         data[0], truncate(data[2]), data[4], data[5]);
@@ -305,6 +320,12 @@ public class Receptionist {
         System.out.println("---------------------------------------------------------");
     }
 
+    /*
+     * NOTES:
+     * - prints full client details
+     * - used when one client is found
+     * - shows each field one line at a time
+     */
     private static void displayClientDetails(List<String> records) {
         System.out.println("\n---------------------------------------------------------");
         System.out.println("                    CLIENT RECORD(s) FOUND:");
@@ -313,6 +334,7 @@ public class Receptionist {
         for (String record : records) {
             if (record == null || record.trim().isEmpty()) continue;
             String[] data = record.split("\\|");
+            /* Print the full client details one record at a time. */
             if (data.length >= 6) {
                 System.out.println("ID *: " + data[0]);
                 System.out.println("NAME *: " + data[2]);
@@ -331,6 +353,11 @@ public class Receptionist {
         }
     }
 
+    /*
+     * NOTES:
+     * - prints reservation records in table style
+     * - keeps the reservation output simple for staff
+     */
     private static void displayReservationTable(List<String> reservations) {
         System.out.println("\n---------------------------------------------------------");
         System.out.printf("  %-8s %-10s %-12s %-10s %-8s %-8s %s\n",
@@ -340,6 +367,7 @@ public class Receptionist {
         for (String record : reservations) {
             if (record == null || record.trim().isEmpty()) continue;
             String[] data = record.split("\\|");
+
             if (data.length >= 10) {
                 String facility;
                 try {
@@ -355,10 +383,22 @@ public class Receptionist {
         System.out.println("---------------------------------------------------------");
     }
 
+    /*
+     * NOTES:
+     * - shortens text for table display
+     * - keeps columns aligned
+     * - adds ellipsis "..." when the text is too long
+     */
     private static String truncate(String value) {
         return truncate(value, 20);
     }
 
+    /*
+     * NOTES:
+     * - shortens a string to a fixed length
+     * - returns the original text if it is already short enough
+     * - used by the table display
+     */
     private static String truncate(String value, int maxLen) {
         if (value == null) return "";
         if (maxLen <= 3) return value;
@@ -366,6 +406,11 @@ public class Receptionist {
         return value.substring(0, maxLen - 3) + "...";
     }
 
+    /*
+     * NOTES:
+     * - changes a room choice number into a room name
+     * - used when reading reservations from file
+     */
     private static String getFacilityName(int choice) {
         return switch (choice) {
             case 1 -> "Single Room";
