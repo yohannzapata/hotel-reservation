@@ -1,22 +1,22 @@
 # Hotel Reservation System
 
-This is DLSL Hotel Reservation Console Program. It lets a user register as a client, make a booking, log in as a receptionist, or log in as a manager.
+This is a DLSL Hotel Reservation console program. A user can register as a client, create a reservation, log in as a receptionist, or log in as a manager.
 
-## What It Can Do
+## What It Does
 
-- register a new client
-- make a reservation
-- let a receptionist look up clients and check guests in
-- let a manager create receptionist accounts and cancel reservations
-- save all data in text files inside `SAVES/`
+- Registers new clients with a generated client ID.
+- Creates reservations with room, guest, meal, and payment choices.
+- Lets receptionists search clients, view reservations, and check guests in.
+- Lets managers create receptionist accounts, view check-in records, and cancel reservations.
+- Saves all data in text files inside the `SAVES/` folder.
 
 ## Main Files
 
-- [Main.java](Main.java) - starts the program and shows the main menu
-- [Client.java](Client.java) - client signup and reservation flow
-- [Receptionist.java](Receptionist.java) - receptionist login and staff tasks
-- [Manager.java](Manager.java) - manager login and admin tasks
-- [FileHandler.java](FileHandler.java) - file reading and saving helper
+- [Main.java](Main.java) - starts the program and shows the main menu.
+- [Client.java](Client.java) - handles client registration and reservation creation.
+- [Receptionist.java](Receptionist.java) - handles receptionist login and daily staff tasks.
+- [Manager.java](Manager.java) - handles manager login and admin actions.
+- [FileHandler.java](FileHandler.java) - handles saving, searching, moving, and reading records.
 
 ## How To Run
 
@@ -27,16 +27,16 @@ javac *.java
 java Main
 ```
 
-The program will create a `SAVES/` folder in the folder where you run it.
+The program creates the `SAVES/` folder in the same folder where you run it.
 
-## Logins
+## Login Information
 
-- manager login is `admin` / `password123`
-- receptionist accounts are saved in `SAVES/RECEPTIONIST.txt`
+- Manager login uses the built-in credentials `admin` / `password123`.
+- Receptionist accounts are stored in `SAVES/RECEPTIONIST.txt`.
 
 ## Saved Data Files
 
-The program stores data as plain text files inside `SAVES/`.
+The program stores information as plain text files inside `SAVES/`.
 
 ### `CLIENTS.txt`
 
@@ -68,8 +68,8 @@ R-5678|C-1234|2026-05-12|2|1|2|4|2500.0|500.0|PaidWithBalance
 
 ### `CHECKED-IN.txt` and `CANCELLED.txt`
 
-- `CHECKED-IN.txt` gets reservations that were checked in.
-- `CANCELLED.txt` gets reservations that were cancelled.
+- `CHECKED-IN.txt` stores reservations that have already been checked in.
+- `CANCELLED.txt` stores reservations that were cancelled.
 
 ### `RECEPTIONIST.txt`
 
@@ -85,18 +85,18 @@ Example:
 receptionist,receptionist123
 ```
 
-## NOTES
+## Notes
 
-- do not type the `|` symbol in client fields
-- contact numbers must be 11 digits
-- emails must end with `@gmail.com`
-- reservation dates must use `YYYY-MM-DD`
-- reservation dates cannot be in the past
+- Do not type the `|` symbol in client fields because it is used as the record separator.
+- Contact numbers must be 11 digits and must be unique.
+- Emails must end with `@gmail.com` and must be unique.
+- A client password is saved during registration and must be entered again before making a reservation.
+- Reservation dates must use the `YYYY-MM-DD` format and cannot be in the past.
 
-## GUIDES
+## Guide
 
-- `Main` opens the program and sends you to the right menu
-- `Client` is for registration and booking
-- `Receptionist` is for lookup, viewing, and check-in
-- `Manager` is for admin login, receptionist accounts, and cancellation
-- `FileHandler` handles save, search, move, and read file work
+- `Main` opens the program and sends you to the correct menu.
+- `Client` is used for registration and booking.
+- `Receptionist` is used for lookup, viewing, and check-in.
+- `Manager` is used for admin login, receptionist accounts, and reservation cancellation.
+- `FileHandler` handles the file work used by the whole program.
