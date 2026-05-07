@@ -82,7 +82,7 @@ username,password
 Example:
 
 ```text
-receptionist,receptionist123
+receptionist,password123
 ```
 
 ## Notes
