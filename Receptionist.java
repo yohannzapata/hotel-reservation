@@ -1,4 +1,6 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 import java.io.*;
 
 public class Receptionist {
@@ -53,9 +55,6 @@ public class Receptionist {
         System.out.println("<-                  RECEPTIONIST LOGIN                 ->");
         System.out.println("=========================================================");
 
-        File staffFile = FileHandler.resolveFilePath(RECEPTIONIST_FILE);
-        ensureDefaultReceptionistAccount(staffFile);
-
         String username, password;
         while (true) {
             System.out.print("\nUsername *: ");
@@ -76,38 +75,6 @@ public class Receptionist {
             if (!sc.nextLine().equalsIgnoreCase("Y")) {
                 return false;
             }
-        }
-    }
-
-    private static void ensureDefaultReceptionistAccount(File staffFile) {
-        try {
-            if (!staffFile.exists()) {
-                staffFile.getParentFile().mkdirs();
-                staffFile.createNewFile();
-            }
-        } catch (IOException e) {
-            return;
-        }
-
-        boolean hasDefault = false;
-        try (BufferedReader br = new BufferedReader(new FileReader(staffFile))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 1 && data[0].trim().equals("receptionist")) {
-                    hasDefault = true;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            return;
-        }
-
-        if (!hasDefault) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(staffFile, true))) {
-                bw.write("receptionist,receptionist123");
-                bw.newLine();
-            } catch (IOException e) {}
         }
     }
 
@@ -200,9 +167,22 @@ public class Receptionist {
         } else if (searchKey.isEmpty()) {
             displayClientTable(allClients);
         } else {
-            List<String> found = FileHandler.searchRecord(CLIENT_FILE, searchKey, 0);
-            if (found.isEmpty()) {
-                found = FileHandler.searchRecord(CLIENT_FILE, searchKey, 1);
+            List<String> found = new ArrayList<>();
+            for (String line : allClients) {
+                if (line == null || line.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] data = line.split("\\|");
+                if (data.length >= 6) {
+                    if (data[0].equals(searchKey) || data[2].equals(searchKey)) {
+                        found.add(line);
+                    }
+                } else if (data.length >= 5) {
+                    if (data[0].equals(searchKey) || data[1].equals(searchKey)) {
+                        found.add(line);
+                    }
+                }
             }
 
             if (found.isEmpty()) {
@@ -313,7 +293,10 @@ public class Receptionist {
         for (String line : clients) {
             if (line == null || line.trim().isEmpty()) continue;
             String[] data = line.split("\\|");
-            if (data.length >= 5) {
+            if (data.length >= 6) {
+                System.out.printf("  %-10s %-20s %-12s %s\n",
+                        data[0], truncate(data[2]), data[4], data[5]);
+            } else if (data.length >= 5) {
                 System.out.printf("  %-10s %-20s %-12s %s\n",
                         data[0], truncate(data[1]), data[3], data[4]);
             }
@@ -330,7 +313,14 @@ public class Receptionist {
         for (String record : records) {
             if (record == null || record.trim().isEmpty()) continue;
             String[] data = record.split("\\|");
-            if (data.length >= 5) {
+            if (data.length >= 6) {
+                System.out.println("ID *: " + data[0]);
+                System.out.println("NAME *: " + data[2]);
+                System.out.println("CONTACT *: " + data[4]);
+                System.out.println("EMAIL *: " + data[5]);
+                System.out.println("ADDRESS *: " + data[3]);
+                System.out.println("---------------------------------------------------------");
+            } else if (data.length >= 5) {
                 System.out.println("ID *: " + data[0]);
                 System.out.println("NAME *: " + data[1]);
                 System.out.println("CONTACT *: " + data[3]);
